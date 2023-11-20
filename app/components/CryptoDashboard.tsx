@@ -10,8 +10,8 @@ export default function CryptoDashboard() {
   useGenerateHistorical();
 
   return (
-    <div className="p-24">
-      <h1 className="font-bold text-[3rem] text-center">
+    <div className="p-24 pt-12">
+      <h1 className="font-bold text-[3rem] text-center pb-4">
         CryptoCurrency Dashboard
       </h1>
       {(!data || isLoading) && <h1 className="text-center">Loading...</h1>}

@@ -1,19 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  CryptoEnum,
   CryptosType,
   CurrenciesType,
   CurrencyEnum,
 } from "../services/constants";
-import { Currencies } from "../services/types/services";
-import { getDateRounded } from "@/app/utils/helpers";
-
-export interface HistoricalValues {
-  date: string;
-  [CurrencyEnum.USD]: number;
-  [CurrencyEnum.EUR]: number;
-  [CurrencyEnum.BTC]: number;
-}
+import { Currencies, HistoricalValues } from "../../types";
+import { transformDate } from "@/app/utils/helpers";
 
 interface InitialStateProps {
   selectedCrypto: CryptosType;
@@ -55,14 +47,14 @@ export const dashboardSlice = createSlice({
     setNewHistoricalValues: (state, action) => {
       const data = action.payload as Currencies;
       state.historicalBTC.unshift({
-        date: getDateRounded(new Date()),
+        date: transformDate(new Date()),
         ...data.BTC,
       });
       if (state.historicalBTC.length > 20) {
         state.historicalBTC.pop();
       }
       state.historicalETH.unshift({
-        date: getDateRounded(new Date()),
+        date: transformDate(new Date()),
         ...data.ETH,
       });
       if (state.historicalETH.length > 20) {

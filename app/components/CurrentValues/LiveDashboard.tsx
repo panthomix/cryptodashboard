@@ -2,7 +2,7 @@
 import React from "react";
 import { Chart } from "react-google-charts";
 import { useGetCurrenciesUpdatesQuery } from "@/app/store/services/cryptoWS";
-import { CurrenciesLists } from "@/app/store/services/types/services";
+import { CurrenciesLists } from "@/app/types";
 import { CurrencyEnum } from "@/app/store/services/constants";
 import { useAppSelector } from "@/app/store/hooks";
 
@@ -23,8 +23,9 @@ const generateData = (
   rawData: CurrenciesLists,
   selectedCurrency: CurrencyEnum
 ) => {
-  const data = [["x", "BTC", "ETH"]];
-  rawData.dates.forEach((date, index) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = [["x", "BTC", "ETH"]] as any[];
+  rawData.dates.forEach((date) => {
     data.push([
       date.split(" ")[1],
       rawData.BTC[selectedCurrency][date],

@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
+// import { useEffect } from "react";
 import { useGetCurrenciesUpdatesQuery } from "@/app/store/services/cryptoWS";
 import { CryptoEnum, CurrencyEnum } from "@/app/store/services/constants";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
@@ -6,13 +7,23 @@ import {
   setSelectCrypto,
   setSelectCurrency,
 } from "@/app/store/reducers/dashboard";
+import { CurrenciesLists } from "@/app/types";
 
-const getLastCurrencyValue = (data: any, crypto: string, currency: string) => {
+const getLastCurrencyValue = (
+  data: CurrenciesLists,
+  crypto: CryptoEnum,
+  currency: CurrencyEnum
+) => {
   if (!data) return 0;
+
+  Object.values(data[crypto][currency]);
+
   return parseFloat(
-    Object.values(data[crypto][currency] || {})[
-      Object.values(data[crypto][currency] || {}).length - 1
-    ]
+    `${
+      Object.values(data[crypto][currency] || {})[
+        Object.values(data[crypto][currency] || {}).length - 1
+      ]
+    }`
   );
 };
 
@@ -22,18 +33,20 @@ export default function Calculator() {
   const { selectedCurrency, selectedCrypto } = useAppSelector(
     (state) => state.dashboard
   );
-  const { data: rawData } = useGetCurrenciesUpdatesQuery();
+  const { data } = useGetCurrenciesUpdatesQuery();
   const dispatch = useAppDispatch();
 
+  if (!data) return null;
+
   const lastBTCValue = getLastCurrencyValue(
-    rawData,
+    data,
     CryptoEnum.BTC,
-    selectedCurrency
+    selectedCurrency as CurrencyEnum
   );
   const lastETHValue = getLastCurrencyValue(
-    rawData,
+    data,
     CryptoEnum.ETH,
-    selectedCurrency
+    selectedCurrency as CurrencyEnum
   );
 
   // useEffect(() => {
@@ -72,11 +85,12 @@ export default function Calculator() {
             const { value } = e.target;
 
             dispatch(setSelectCurrency(value));
+            if (!currencyValue) return;
             setCryptoValue(
               currencyValue /
                 getLastCurrencyValue(
-                  rawData,
-                  selectedCrypto,
+                  data,
+                  selectedCrypto as CryptoEnum,
                   value as CurrencyEnum
                 )
             );
@@ -99,11 +113,6 @@ export default function Calculator() {
           value={cryptoValue}
           onChange={(e) => {
             const { value } = e.target;
-            if (!value) {
-              setCryptoValue(0);
-              // setCurrencyValue(0);
-              return;
-            }
             setCryptoValue(parseFloat(value));
             setCurrencyValue(
               parseFloat(value) *
@@ -119,12 +128,13 @@ export default function Calculator() {
           onChange={(e) => {
             const { value } = e.target;
             dispatch(setSelectCrypto(value));
+            if (!cryptoValue) return;
             setCurrencyValue(
               cryptoValue *
                 getLastCurrencyValue(
-                  rawData,
+                  data,
                   value as CryptoEnum,
-                  selectedCurrency
+                  selectedCurrency as CurrencyEnum
                 )
             );
           }}

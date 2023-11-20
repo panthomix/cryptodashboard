@@ -1,5 +1,4 @@
-import { HistoricalValues } from "@/app/store/reducers/dashboard";
-import { CurrencyEnum } from "@/app/store/services/constants";
+import { HistoricalValues } from "@/app/types";
 import React from "react";
 
 interface ExchangeTableProps {

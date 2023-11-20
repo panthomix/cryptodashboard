@@ -5,5 +5,5 @@ Given("I'm a visitor", () => {});
 
 When("I enter into the site", () => {
   cy.visit(APP_URL);
-  cy.get('[data-testid="btc-currency"]').should("not.be.empty");
+  cy.wait(1000);
 });

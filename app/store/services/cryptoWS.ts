@@ -1,30 +1,30 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_KEY, API_URL } from "./constants";
-import { CurrenciesLists, Currencies, DatesValueMap } from "./types/services";
-import { getDateRounded } from "@/app/utils/helpers";
+import { API_KEY, API_URL, CryptoEnum, CurrencyEnum } from "./constants";
+import { CurrenciesLists, Currencies, DatesValueMap } from "../../types";
+import { transformDate } from "@/app/utils/helpers";
 
-const transformResponse = (response: Currencies) => {
-  const date = getDateRounded(new Date());
+const transformResponse = (response: Currencies): CurrenciesLists => {
+  const date = transformDate(new Date());
   const responseValue = {
-    BTC: {
-      USD: {
+    [CryptoEnum.BTC]: {
+      [CurrencyEnum.USD]: {
         [date]: response.BTC.USD,
       },
-      EUR: {
+      [CurrencyEnum.EUR]: {
         [date]: response.BTC.EUR,
       },
-      BTC: {
+      [CurrencyEnum.BTC]: {
         [date]: response.BTC.BTC,
       },
     },
-    ETH: {
-      USD: {
+    [CryptoEnum.ETH]: {
+      [CurrencyEnum.USD]: {
         [date]: response.ETH.USD,
       },
-      EUR: {
+      [CurrencyEnum.EUR]: {
         [date]: response.ETH.EUR,
       },
-      BTC: {
+      [CurrencyEnum.BTC]: {
         [date]: response.ETH.BTC,
       },
     },
@@ -73,14 +73,14 @@ export const api = createApi({
               };
               ws.send(JSON.stringify(subRequest));
             }
-
+            // eslint-disable-next-line no-console
             if (data.TYPE !== "0") return console.log("Socket status:", data);
 
             updateCachedData((draft: CurrenciesLists) => {
               const crypto = data.FSYM as keyof CurrenciesLists;
               const currency =
                 data.TSYM as keyof CurrenciesLists[typeof crypto];
-              const date = getDateRounded(new Date(data.TS * 1000));
+              const date = transformDate(new Date(data.TS * 1000));
               (draft[crypto][currency][date] as DatesValueMap) = data.P;
               if (!draft.dates.includes(date)) draft.dates.push(date);
 
@@ -100,6 +100,7 @@ export const api = createApi({
           };
           ws.addEventListener("message", listener);
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error("🚀 ~ file: cryptoWS.ts:80 ~ e:", e);
         }
         await cacheEntryRemoved;

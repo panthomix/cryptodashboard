@@ -1,3 +1,4 @@
+import React from "react";
 import ExchangeTable from "./ExchangeTable";
 import { CurrencyEnum } from "@/app/store/services/constants";
 import { useAppSelector } from "@/app/store/hooks";

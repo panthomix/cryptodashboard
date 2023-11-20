@@ -1,4 +1,4 @@
-import { CryptoEnum, CurrencyEnum } from "../constants";
+import { CryptoEnum, CurrencyEnum } from "../store/services/constants";
 
 interface CurrenciesMap {
   [CurrencyEnum.USD]: number;
@@ -11,7 +11,7 @@ export interface Currencies {
 }
 
 export interface DatesValueMap {
-  [date: string]: string;
+  [date: string]: number;
 }
 
 export interface CurrenciesDateMap {
@@ -24,4 +24,11 @@ export interface CurrenciesLists {
   [CryptoEnum.BTC]: CurrenciesDateMap;
   [CryptoEnum.ETH]: CurrenciesDateMap;
   dates: string[];
+}
+
+export interface HistoricalValues {
+  date: string;
+  [CurrencyEnum.USD]: number;
+  [CurrencyEnum.EUR]: number;
+  [CurrencyEnum.BTC]: number;
 }
