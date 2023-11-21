@@ -24,6 +24,7 @@ export interface CurrenciesLists {
   [CryptoEnum.BTC]: CurrenciesDateMap;
   [CryptoEnum.ETH]: CurrenciesDateMap;
   dates: string[];
+  error?: boolean;
 }
 
 export interface HistoricalValues {

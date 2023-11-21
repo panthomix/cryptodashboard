@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_KEY, API_URL, CryptoEnum, CurrencyEnum } from "./constants";
-import { CurrenciesLists, Currencies, DatesValueMap } from "../../types";
+import {
+  CurrenciesLists,
+  Currencies,
+  DatesValueMap,
+  CurrenciesDateMap,
+} from "../../types";
 import { transformDate } from "@/app/utils/helpers";
 
 const transformResponse = (response: Currencies): CurrenciesLists => {
@@ -60,6 +65,7 @@ export const api = createApi({
           await cacheDataLoaded;
           const listener = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
+
             if (data.TYPE === "20" && data.MESSAGE === "STREAMERWELCOME") {
               const subRequest = {
                 action: "SubAdd",
@@ -73,27 +79,37 @@ export const api = createApi({
               };
               ws.send(JSON.stringify(subRequest));
             }
-            // eslint-disable-next-line no-console
-            if (data.TYPE !== "0") return console.log("Socket status:", data);
+            if (!["0", "429"].includes(data.TYPE))
+              // eslint-disable-next-line no-console
+              return console.log("Socket status:", data);
 
             updateCachedData((draft: CurrenciesLists) => {
-              const crypto = data.FSYM as keyof CurrenciesLists;
-              const currency =
-                data.TSYM as keyof CurrenciesLists[typeof crypto];
-              const date = transformDate(new Date(data.TS * 1000));
-              (draft[crypto][currency][date] as DatesValueMap) = data.P;
-              if (!draft.dates.includes(date)) draft.dates.push(date);
+              if (data.TYPE === "429") {
+                draft.error = data.MESSAGE;
+                ws.close();
+              } else {
+                const crypto = data.FSYM as keyof CurrenciesLists;
+                const currency =
+                  data.TSYM as keyof CurrenciesLists[typeof crypto];
+                const date = transformDate(new Date(data.TS * 1000));
 
-              // We only want to keep the 100 dates to avoid memory leaks
-              if (draft.dates.length > 100) {
-                const oldestDate = draft.dates.shift();
-                if (oldestDate) {
-                  delete draft.BTC.USD[oldestDate];
-                  delete draft.BTC.EUR[oldestDate];
-                  delete draft.BTC.BTC[oldestDate];
-                  delete draft.ETH.USD[oldestDate];
-                  delete draft.ETH.EUR[oldestDate];
-                  delete draft.ETH.BTC[oldestDate];
+                ((draft[crypto] as CurrenciesDateMap)[currency][
+                  date
+                ] as DatesValueMap) = data.P;
+
+                if (!draft.dates.includes(date)) draft.dates.push(date);
+
+                // We only want to keep the 100 dates to avoid memory leaks
+                if (draft.dates.length > 100) {
+                  const oldestDate = draft.dates.shift();
+                  if (oldestDate) {
+                    delete draft.BTC.USD[oldestDate];
+                    delete draft.BTC.EUR[oldestDate];
+                    delete draft.BTC.BTC[oldestDate];
+                    delete draft.ETH.USD[oldestDate];
+                    delete draft.ETH.EUR[oldestDate];
+                    delete draft.ETH.BTC[oldestDate];
+                  }
                 }
               }
             });
