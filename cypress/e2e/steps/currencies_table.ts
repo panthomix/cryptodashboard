@@ -3,6 +3,7 @@ import { DataTable, Then } from "@badeball/cypress-cucumber-preprocessor";
 Then(
   "I should see a {string} table with the following information",
   (id, table: DataTable) => {
+    cy.wait(1000);
     table.hashes().forEach((element) => {
       Object.keys(element).forEach((title) => {
         cy.get(`[data-testid="${id}-table"]`).should("contain", title);

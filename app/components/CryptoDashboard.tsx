@@ -14,7 +14,11 @@ export default function CryptoDashboard() {
       <h1 className="font-bold text-[3rem] text-center pb-4">
         CryptoCurrency Dashboard
       </h1>
-      {(!data || isLoading) && <h1 className="text-center">Loading...</h1>}
+      {(!data || isLoading) && (
+        <h1 className="text-center" data-testid="loading-div">
+          Loading...
+        </h1>
+      )}
       {!!data && (
         <div className="flex flex-col items-center gap-y-8">
           <CurrentValues />

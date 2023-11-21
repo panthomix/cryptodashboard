@@ -1,47 +1,44 @@
 import { Then } from "@badeball/cypress-cucumber-preprocessor";
 import { fetchCurrencyData } from "../utils";
 
-const sleep = (delay: number) =>
-  new Promise((resolve) => setTimeout(resolve, delay));
-
 Then(
   "I select {string} as cryptocurrency in the calculator",
-  (cryptocurrency: string) => {
+  function (cryptocurrency: string) {
     cy.get('[data-testid="crypto-selector"]').select(cryptocurrency);
     cy.get('[data-testid="crypto-selector"]').blur();
+    this.currentCrypto = cryptocurrency;
   }
 );
 
-Then("I enter {string} in the input", (value: string) => {
+Then("I enter {string} in the input", function (value: string) {
   cy.get('[data-testid="crypto-value"]').clear();
   cy.get('[data-testid="crypto-value"]').type(value);
   cy.get('[data-testid="crypto-value"]').blur();
+  this.cryptoInput = parseFloat(value);
 });
 
-Then("If I change the currency to {string}", (cryptocurrency: string) => {
-  cy.get('[data-testid="currency-selector"]').select(cryptocurrency);
+Then("If I change the currency to {string}", function (currency: string) {
+  cy.get('[data-testid="currency-selector"]').select(currency);
   cy.get('[data-testid="currency-selector"]').blur();
+  this.currentCurrency = currency;
+});
+
+Then("I should see the equivalent in {string}", function (currency: string) {
+  cy.wrap(null).then(async () => {
+    const data = await fetchCurrencyData();
+    cy.get('[data-testid="currency-value"]').should(
+      "have.value",
+      data[this.currentCrypto][currency] * this.cryptoInput
+    );
+  });
 });
 
 Then(
-  "I should see the equivalent {string} in {string}",
-  (cryptocurrency: string, currency: string) => {
-    cy.wrap(null).then(async () => {
-      const data = await fetchCurrencyData();
-      cy.get('[data-testid="currency-value"]').should(
-        "have.value",
-        data[cryptocurrency][currency] * 200
-      );
-    });
-  }
-);
-
-Then(
-  "The calculator should update the {string} equivalent in {string}",
-  (cryptocurrency: string, currency: string) => {
+  "The calculator should update the equivalent in {string}",
+  function (currency: string) {
     cy.get('[data-testid="currency-value"').invoke("val").as("currency_value");
     cy.get('[data-testid="crypto-value"').invoke("val").as("crypto_value");
-    cy.get(`[data-testid="${cryptocurrency.toLowerCase()}-currency"`)
+    cy.get(`[data-testid="${this.currentCrypto.toLowerCase()}-currency"`)
       .invoke("text")
       .as("btc_currency");
 
